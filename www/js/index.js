@@ -58,11 +58,16 @@ function calcula(form) {
            var saldoDevedor;     
            var quantidadeParcelasPagas = form.parcelasPagas.value;
            prest                       = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i );
-           saldoDevedor = pv-(prest*quantidadeParcelasPagas)
+          // saldoDevedor =   prest*fvaPrice();// pv-(prest*quantidadeParcelasPagas)
+            
+          var n        = parseFloat(np-quantidadeParcelasPagas);
+          var ind      = parseFloat(1+i);
+          var base     = parseFloat(Math.pow(ind,n));
+          var cima     = parseFloat((base-1));
+          var baixo    = parseFloat((base*i));
+          var fva      = parseFloat((cima/baixo));
+          saldoDevedor = prest*fva
             form.resposta.value = saldoDevedor.toFixed(2);
-
-            //alert("O valor da mensalidade é " + prest);
-
         }
            
 
@@ -87,15 +92,20 @@ function calcula(form) {
 
        }else {
            //PRICE
-            var saldoDevedor;        
-                                      // Valor da prestação
-             var saldoDevedor;     
+           var saldoDevedor;     
            var quantidadeParcelasPagas = form.parcelasPagas.value;
            prest                       = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i );
-           saldoDevedor = pv-(prest*quantidadeParcelasPagas)
-            form.resposta.value = saldoDevedor.toFixed(2);
+          // saldoDevedor =   prest*fvaPrice();// pv-(prest*quantidadeParcelasPagas)
+            
+          var n        = parseFloat(np-quantidadeParcelasPagas);
+          var ind      = parseFloat(1+i);
+          var base     = parseFloat(Math.pow(ind,n));
+          var cima     = parseFloat((base-1));
+          var baixo    = parseFloat((base*i));
+          var fva      = parseFloat((cima/baixo));
+          saldoDevedor = prest*fva
 
-            //alert("O valor da mensalidade é " + prest);
+            form.resposta.value = saldoDevedor.toFixed(2);
         }
     }
     else if(tipo==4){
