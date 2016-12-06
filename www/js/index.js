@@ -1,7 +1,84 @@
 
 
-
+function comp_financiamento(np,i,pv, cmbTabela) {
+  var cmbTabela;
+  switch (cmbTabela.selectedIndex) {
+    case 2:
+      tabela = comp_price(np,i,pv);
+      break;
+    case 1:
+      tabela = comp_sac(np,i,pv);
+      break;
+    default:
+      throw "comp_financiamento: cmbTabela.selectedIndex invalido!";
+  }
+if (tabela != null) {
+    tabela.header = ["#","Pagamentos","Amortizações","Juros","Saldo Devedor"];
   
+    var html = "<table class='numbers'>";
+    html += '<tr><th>'+tabela.header[0]+'</th><th>'+tabela.header[1]+'</th><th>'+tabela.header[2]+'</th><th>'+tabela.header[3]+'</th><th>'+tabela.header[4]+'</th></tr>';
+    for (ii in tabela.linhas) {
+      var lin = tabela.linhas[ii];
+      html += '<tr><th>'+lin[0]+'</th><td>'+lin[1]+'</td><td>'+lin[2]+'</td><td>'+lin[3]+'</td><td>'+lin[4]+'</td></tr>';   
+    }
+    html += '<tr><th>'+tabela.footer[0]+'</th><td>'+tabela.footer[1]+'</td><td>'+tabela.footer[2]+'</td><td>'+tabela.footer[3]+'</td><th>'+tabela.footer[4]+'</th></tr></table>';
+    
+    document.getElementById('sac_result').innerHTML = html;
+  }
+
+}
+  function comp_sac(np,i,pv) {
+  var tabela = new Tabela();
+
+ 
+  var j = 0;
+  var amortizacao = pv/np;
+  var totalJuros = 0;
+  var totalAmort = 0;
+  var totalParc = 0;
+  for (j=0; j<np; j++) {
+    var parcela = amortizacao + pv*i;
+    tabela.linhas.push([(j+1), parcela.toFixed(2), amortizacao.toFixed(2), (pv*i).toFixed(2), (pv-amortizacao).toFixed(2)]);
+    totalJuros += pv*i;
+    totalAmort += amortizacao;
+    totalParc += parcela;
+    pv -= amortizacao;
+  }
+  tabela.footer = [" » ", totalParc.toFixed(2), totalAmort.toFixed(2), totalJuros.toFixed(2),"« TOTAIS"];
+  
+  return tabela;
+
+}
+
+  function comp_price(np, i,pv) {
+  var tabela = new Tabela();
+
+  var j = 0;
+  var parcela = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
+
+  var totalJuros = 0;
+  var totalAmort = 0;
+  var totalParc = 0;
+  for (j=0; j<np; j++) {
+    var amortizacao = parcela-pv*i;
+    tabela.linhas.push([(j+1).toFixed(2), parcela.toFixed(2), amortizacao.toFixed(2), (pv*i).toFixed(2), (pv-amortizacao).toFixed(2)]);
+    totalJuros += pv*i;
+    totalAmort += amortizacao;
+    totalParc += parcela;
+    pv -= amortizacao;
+  }
+  
+  tabela.footer = [" » ", totalParc.toFixed(2), totalAmort.toFixed(2), totalJuros.toFixed(2),"« TOTAIS"];
+  return tabela;
+
+}
+
+function Tabela() {
+  this.header = [];
+  this.linhas = [];
+  this.footer = [];
+}
+
 function calcula(form) {
     var e = form.cmbTipo;
     if(e!=null)
@@ -23,17 +100,19 @@ function calcula(form) {
        
        if(tabela==1){
            //SAC
-           prest = (pv/np) + (i*pv); 
+           var n = np;
+           var A = pv/np;
+           var k = quantidadeParcelasPagas;
+           prest = (n-k+1)*i*A;
            form.resposta.value = prest.toFixed(2);
-  
        }else {
            //PRICE
            
-            prest       = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i );
+            prest       = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
             form.resposta.value = prest.toFixed(2);
        }
        
-       // alert("O valor da mensalidade é " + prest);
+            comp_financiamento(np,i,pv, form.cmbTabela);
  
     }
     else if(tipo==2){
@@ -57,7 +136,7 @@ function calcula(form) {
             //PRICE
            var saldoDevedor;     
            var quantidadeParcelasPagas = form.parcelasPagas.value;
-           prest                       = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i );
+           prest                       = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
           // saldoDevedor =   prest*fvaPrice();// pv-(prest*quantidadeParcelasPagas)
             
           var n        = parseFloat(np-quantidadeParcelasPagas);
@@ -69,7 +148,8 @@ function calcula(form) {
           saldoDevedor = prest*fva
             form.resposta.value = saldoDevedor.toFixed(2);
         }
-           
+                     comp_financiamento(np,i,pv, form.cmbTabela);
+  
 
     }
     else if(tipo==3){
@@ -94,7 +174,7 @@ function calcula(form) {
            //PRICE
            var saldoDevedor;     
            var quantidadeParcelasPagas = form.parcelasPagas.value;
-           prest                       = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i );
+           prest                       = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
           // saldoDevedor =   prest*fvaPrice();// pv-(prest*quantidadeParcelasPagas)
             
           var n        = parseFloat(np-quantidadeParcelasPagas);
@@ -107,6 +187,8 @@ function calcula(form) {
 
             form.resposta.value = saldoDevedor.toFixed(2);
         }
+                    comp_financiamento(np,i,pv, form.cmbTabela);
+
     }
     else if(tipo==4){
         //3.    Calcular parcela de Juros em um mês especifico /a.  Calcular a primeira parcela
@@ -127,6 +209,8 @@ function calcula(form) {
             form.resposta.value = parcelaJuros.toFixed(2);
             //alert("O valor da mensalidade é " + prest);
         }
+                    comp_financiamento(np,i,pv, form.cmbTabela);
+
     }
     else if(tipo==5){
         ////3.    Calcular parcela de Juros em um mês especifico - b.   Calcular uma parcela corrente;       
@@ -141,7 +225,7 @@ function calcula(form) {
                 var restante, parcelaAmortizada;
                 var a1;
 
-                parcela     = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i );
+                parcela     = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
                 a1 = parcela-(i*pv);
                 parcelaAmortizada =  a1*Math.pow((1+i), (quantidadeParcelasPagas-1));
                 parcelaJuros  = parcela-parcelaAmortizada;
@@ -160,13 +244,15 @@ function calcula(form) {
             var parcelaJuros;                                          // Valor da prestação
                 var restante, parcelaAmortizada;
                 var a1;
-                parcela     = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i );
+                parcela     = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
                 a1 = parcela-(i*pv);
                 parcelaAmortizada =  a1*Math.pow((1+i), (quantidadeParcelasPagas-1));
            
             form.resposta.value = parcelaAmortizada.toFixed(2);
-           // alert("O valor da mensalidade é " + prest);
+
        }
+                   comp_financiamento(np,i,pv, form.cmbTabela);
+                   
     }
     else if(tipo==7){
         //4.    Calcular parcela de amortização em um mês especifico;  -  b.    Calcular em período especifico;
@@ -184,12 +270,14 @@ function calcula(form) {
                                                      // Valor da prestação
                 var restante, parcelaAmortizada;
                 var a1;
-                parcela     = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i );
+                parcela     = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
                 a1 = parcela-(i*pv);
                 parcelaAmortizada =  a1*Math.pow((1+i), (parcelaCalculo-1));
            
             form.resposta.value = parcelaAmortizada.toFixed(2);
         }
+                    comp_financiamento(np,i,pv, form.cmbTabela);
+
     }
     else if(tipo==8){
         //5.    Calcular valor das amortizações acumuladas; a.  Calcular do início até hoje;
@@ -198,19 +286,21 @@ function calcula(form) {
                     //Calcula o Valor da amortização que é constante na tabela SAC
                     var  amortizacaoAcumulada = (pv/np)*quantidadeParcelasPagas;
                     //amortizacaoAcumulada = amortizacaoAcumulada + amortizacao;
-                    form.resposta.value = amortizacaoAcumulada;
+                    form.resposta.value = amortizacaoAcumulada.toFixed(2);
                  }else {
                     //PRICE
                     var prest;        
                     var somaAmortizaca;
                      // Valor da prestação
-                    prest       = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i );
+                    prest       = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
                     somaAmortizacao = prest*(fvaPrice()-fvatPrice());
                     
                                                      
                     form.resposta.value = somaAmortizacao.toFixed(2);
-                  //alert("O valor da mensalidade é " + prest);
+
           }
+                      comp_financiamento(np,i,pv, form.cmbTabela);
+
 
     }
     else if(tipo==9){
@@ -230,12 +320,14 @@ function calcula(form) {
                     var prest;        
                     var somaAmortizaca;
                      // Valor da prestação
-                    prest       = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i );
+                    prest       = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
                     somaAmortizacao = prest*(fvaPrice()-fvatPrice());
                     
                                                      
                     form.resposta.value = somaAmortizacao.toFixed(2);
        }
+                           comp_financiamento(np,i,pv, form.cmbTabela);
+
      }
     else if(tipo==10){ ///Calculo de valor de juros acumulados até um determinado periodo
         if(tabela==1){
@@ -248,6 +340,8 @@ function calcula(form) {
 
             //somaJuros = r*(t-fva*(i*n))*fva*(i*n*t));
         }
+                            comp_financiamento(np,i,pv, form.cmbTabela);
+
     }
     else if(tipo==11){ ///Calculo de valor de juros acumulados entre periodo
         if(tabela==1){
@@ -259,8 +353,10 @@ function calcula(form) {
            var somaJuros;
 
             //somaJuros = r*(fva*(i*n-t)-fva*(i*n-(t+k));
-            form.resposta.value  = somaJuros;
+            form.resposta.value  = somaJuros.toFixed(2);
         }
+                    comp_financiamento(np,i,pv, form.cmbTabela);
+
     
     } else {                                               // ALD Automóvel
         var prest;                                         // Valor da prestação
@@ -272,7 +368,7 @@ function calcula(form) {
         var ix = form.aldnmeses.selectedlndex;             // Numero de Meses seleccionado
         var np = form.aldnmeses.options[ix].text;          // Numero de Prestações
  
-        prest = Math.round((pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i )
+        prest = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
         form.aldmens.value = prest;
      }
 }
