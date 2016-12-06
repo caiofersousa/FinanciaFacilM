@@ -332,28 +332,44 @@ function calcula(form) {
     else if(tipo==10){ ///Calculo de valor de juros acumulados até um determinado periodo
         if(tabela==1){
           //SAC
+          var amortizacao = pv/np;
+          var somaJuros = i*amortizacao*quantidadeParcelasPagas*((2*np-quantidadeParcelasPagas+1)/2);
+          form.resposta.value = somaJuros.toFixed(2);
 
 
         }else{
           //PRICE
-            var somaJuros;
+          var R = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
+            var somaJuros = R *(quantidadeParcelasPagas-fvaPrice()+fvatPrice());
 
             //somaJuros = r*(t-fva*(i*n))*fva*(i*n*t));
+            form.resposta.value = somaJuros.toFixed(2);
+
         }
                             comp_financiamento(np,i,pv, form.cmbTabela);
 
     }
     else if(tipo==11){ ///Calculo de valor de juros acumulados entre periodo
+      var inicial = form.inicial.value;
+        var fim = form.fim.value
+        var k = (fim-inicial);
+
         if(tabela==1){
           //SAC
+          var amortizacao = pv/np;
+          var somaJuros = i*amortizacao*k*((np-inicial- ((k-1)/2)));
+          form.resposta.value = somaJuros.toFixed(2);
 
             //form.resposta.value 
         }else{
           //PRICE
-           var somaJuros;
+          //PRICE
+          var R = (pv * (Math.pow(1+i,np)) ) / (Math.pow(1+i,np)-1)* i ;
+          var k = fim-inicial;
+            var somaJuros = R *(k -fvaPrice()+fvatPrice());
 
-            //somaJuros = r*(fva*(i*n-t)-fva*(i*n-(t+k));
-            form.resposta.value  = somaJuros.toFixed(2);
+            //somaJuros = r*(t-fva*(i*n))*fva*(i*n*t));
+            form.resposta.value = somaJuros.toFixed(2);
         }
                     comp_financiamento(np,i,pv, form.cmbTabela);
 
@@ -372,6 +388,7 @@ function calcula(form) {
         form.aldmens.value = prest;
      }
 }
+  
 
 ///******PRICE*********/
 function kPrice()
